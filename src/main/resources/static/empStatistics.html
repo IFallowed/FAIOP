@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>员工简图</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/deptUsers.css">
+</head>
+<body>
+<body>
+<div class="container-fluid clearfix" id="app">
+    <h6>统计报表 >> 员工简图</h6>
+    <form>
+        <div class="row row-cols-4">
+            <div class="col-sm-3 mb-3">
+                <label for="name">姓名</label>
+                <input type="text" class="form-control" id="name" required v-model="name" onkeyup="this.value=this.value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5.]/g,'')">
+            </div>
+            <div class="col-sm-3 mb-3">
+                <label for="dept">部门：</label>
+                <select class="form-control" id="dept" v-model="dept">
+                    <option value="">请选择</option>
+                    <option v-for="option in depts" :value="option">
+                        {{ option}}
+                    </option>
+                </select>
+            </div>
+            <div class="col-sm-3 mb-3">
+                <label for="state">状态：</label>
+                <select class="form-control" id="state" v-model="state">
+                    <option value="">请选择</option>
+                    <option v-for="option in options" :value="option.id">
+                        {{ option.name }}
+                    </option>
+                </select>
+            </div>
+            <div class="col-sm-2 mb-3">
+                <button type="button" class="btn btn-primary" @click="query(1)">查询</button>
+            </div>
+        </div>
+    </form>
+    <div class="users clearfix">
+        <!-- v-for="(user,index) in users" -->
+        <div class="perUser" v-for="(user,index) in dataList">
+            <img :src="user.avatar"></img>
+            <input type="hidden" value="user.id" ref="userId">
+            <div class="rowInfo">
+                <label>姓名：</label>
+                <label v-text="user.name"></label>
+            </div>
+            <div class="rowInfo">
+                <label>年龄：</label>
+                <label v-text="user.age"></label>
+            </div>
+            <div class="rowInfo">
+                <label>性别：</label>
+                <label v-text="user.sex"></label>
+            </div>
+            <div class="rowInfo">
+                <label>职位：</label>
+                <label v-text="user.role.name"></label>
+            </div>
+            <div class="rowInfo rowWidth-200">
+                <label>联系电话：</label>
+                <label v-text="user.phone"></label>
+            </div>
+            <div class="rowInfo rowWidth-200">
+                <label>地址:</label>
+                <label v-text="user.address"></label>
+            </div>
+            <div class="rowInfo rowWidth-200">
+                <label>工龄：</label>
+                <label v-text="showDate(user.createTime)"></label>
+            </div>
+            <div class="user_State bgc_green" v-show="user.state === '1'">
+            </div>
+            <div class="user_State bgc_yellow" v-show="user.state === '2'">
+            </div>
+            <div class="user_State bgc_blue" v-show="user.state === '3'">
+            </div>
+            <div class="user_State bgc_grey" v-show="user.state === '4'">
+            </div>
+        </div>
+    </div>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item page-link cursor-pointer" @click="query(1)">首页</li>
+            <li class="page-item page-link cursor-pointer" @click="query(currentPage-1)">上一页 </li>
+            <li class="page-item page-link ">{{currentPage}}</li>
+            <li class="page-item page-link cursor-pointer" @click="query(currentPage+1)">下一页</li>
+            <li class="page-item page-link cursor-pointer" @click="query(totalPage)">末页</li>
+        </ul>
+    </nav>
+</div>
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+<!-- 开发环境版本，包含了有帮助的命令行警告 -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    const app = new Vue({
+        el: "#app",
+        data: {
+            name: '',
+            state: '',
+            dept: '',
+            depts: '',
+            options: [
+                { name: '在职', id: '1' },
+                { name: '休假', id: '2' },
+                { name: '出差', id: '3' },
+                { name: '离职', id: '4' },
+            ],
+            dataList: '',
+            totalPage:'',
+            currentPage:'',
+
+        },
+        methods: {
+            showDate(time){
+                let date = new Date(time);
+                let now = new Date();
+                let dateTime = date.getTime();
+                let nowTime = now.getTime();
+                let restTime = now.getTime() - date.getTime();
+                let year = Math.floor(restTime / 31536000000);
+                let month =Math.floor((restTime % 31536000000) / 2592000000);
+                let day = Math.floor(((restTime % 31536000000) % 2592000000) / 86400000);
+                return year + "年" + month + "月" + day + "天";
+            },
+            query(pageNo){
+                let _this = this;
+                axios({
+                    method: 'post',
+                    url: '/count/getEmps',
+                    data: {
+                        name: _this.name,
+                        dept: _this.dept,
+                        state: _this.state,
+                        pageNo: pageNo,
+                    }
+                })
+                    .then(function(result) {
+                        _this.dataList = result.data.dataList;
+                        _this.totalPage = result.data.totalPage;
+                        _this.currentPage = result.data.currentPage;
+                        _this.dept = result.data.dept;
+                        _this.name = result.data.name;
+                        _this.state = result.data.state;
+                    })
+                    .catch(function(err){
+                        console.log(err);
+                    });
+            }
+        },
+        created(){
+            let _this = this;
+            _this.query(1);
+            axios({
+                method: 'post',
+                url: '/count/getDepts',
+            })
+                .then(function(result) {
+                    _this.depts = result.data;
+                })
+                .catch(function(err){
+                    console.log(err);
+                });
+        }
+    })
+</script>
+</body>
+</body>
+</html>

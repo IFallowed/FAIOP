@@ -1,0 +1,42 @@
+body {
+    background-color: aliceblue;
+    overflow: auto;
+}
+form {
+    width: 900px;
+    height: 120px;
+    margin:  15px 0 0 50px;
+    padding: 20px 0 0 40px;
+}
+
+form button {
+    width: 140px !important;
+    margin-top: 30px;
+}
+
+table {
+    width: 1100px !important;
+    margin-left: 30px;
+    margin-top: 20px;
+    text-align: center;
+}
+.width-280{
+    width: 280px;
+}
+span {
+    margin:10px 0 0 10px;
+    font-size: 16px;
+    color: red;
+    font-weight: bold;
+}
+.width-280{
+    width: 280px;
+}
+.img_normal_size{
+    width: 50px;
+    height: 60px;
+}
+.img_large_size{
+    width: 200px;
+    height: 240px;
+}

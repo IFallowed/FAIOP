@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>部门业绩</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/resourceList.css">
+</head>
+<body>
+    <div class="container-fluid clearfix" id="app">
+        <h6>销售管理 >> 部门业绩</h6>
+        <form>
+            <div class="row row-cols-4">
+                <div class="col-sm-3 mb-3">
+                    <label for="seller">经办人：</label>
+                    <input type="text" class="form-control" id="seller" required v-model="seller" onkeyup="this.value=this.value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5.]/g,'')">
+                </div>
+                <div class="col-sm-3 mb-3">
+                    <label for="consumer">客户：</label>
+                    <input type="text" class="form-control" id="consumer" required v-model="consumer" onkeyup="this.value=this.value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5.]/g,'')">
+                </div>
+                <div class="col-sm-3 mb-3">
+                    <label for="createTime">上传时间：</label>
+                    <input type="date" class="form-control" id="createTime" required v-model="createTime">
+                </div>
+                <div class="col-sm-2 mb-3">
+                    <button type="button" class="btn btn-primary" @click="query(1)">查询</button>
+                </div>
+            </div>
+        </form>
+        <div>
+            <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th scope="col">编号</th>
+                    <th scope="col">经办人</th>
+                    <th scope="col">客户</th>
+                    <th scope="col">上传时间</th>
+                    <th scope="col">纸质图片</th>
+                    <th scope="col">下载合同</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for = "item in dataList">
+                    <td v-text="item.id"></td>
+                    <td v-text="item.seller.name"></td>
+                    <td v-text="item.consumer"></td>
+                    <td v-text="showDate(item.createTime)"></td>
+                    <td @click="amplifyImg(item.entityPic)">
+                        <img :src="item.entityPic" class="img_normal_size"><img>
+                    </td>
+                    <td>
+                        <a class="btn btn-primary" :href="'/sale/download/' + item.id">下载</a>
+                    </td>
+                  </tr>
+              </table>
+        </div>
+        <div>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    <li class="page-item page-link cursor-pointer" @click="query(1)">首页</li>
+                    <li class="page-item page-link cursor-pointer" @click="query(currentPage-1)">上一页 </li>
+                    <li class="page-item page-link ">{{currentPage}}</li>
+                    <li class="page-item page-link cursor-pointer" @click="query(currentPage+1)">下一页</li>
+                    <li class="page-item page-link cursor-pointer" @click="query(totalPage)">末页</li>
+                </ul>
+            </nav>
+        </div>
+        <button id="modal" ref="amplifyImg" type="button" class="btn btn-primary isNotVisiable" data-toggle="modal" data-target="#amplifyImg"></button>
+        
+        <!-- Modal -->
+        <div class="modal fade" id="amplifyImg" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">大图</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                    <img :src="entityPic" class="img_large_size"><img>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const app = new Vue({
+            el: "#app",
+            data: {
+                dataList: '',
+                currentPage: '',
+                totalPage: '',
+                entityPic: '',
+                seller: '',
+                consumer: '',
+                createTime: '',
+            },
+            methods: {
+                query(pageNo){
+                    let _this = this;
+                    axios({
+                        method: 'post',
+                        url: '/sale/getDeptSaleContracts',
+                        data: {
+                            seller : _this.seller,
+                            consumer: _this.consumer,
+                            createTime: _this.createTime,
+                            pageNo: pageNo,
+                        }
+                    })
+                        .then(function(result){
+                            _this.dataList = result.data.dataList;
+                            _this.totalPage = result.data.totalPage;
+                            _this.currentPage = result.data.currentPage;
+                            _this.seller = result.data.seller;
+                            _this.consumer = result.data.consumer;
+                            _this.createTime = result.data.createTime;
+                        })
+                        .catch(function(err){
+                            console.log(err);
+                        })
+                },
+                amplifyImg(src) {
+                    this.entityPic = src;
+                    this.$refs.amplifyImg.click();
+                },
+                showDate(time){
+                    let nowTime = new Date(time);
+                    let year = nowTime.getFullYear();
+                    let month = nowTime.getMonth() + 1 < 10 ? "0" + (nowTime.getMonth() + 1) : nowTime.getMonth() + 1;
+                    let date = nowTime.getDate() < 10 ? "0" + nowTime.getDate() : nowTime.getDate();
+                    let hour = nowTime.getHours() < 10 ? "0" + nowTime.getHours() : nowTime.getHours();
+                    let minute = nowTime.getMinutes() < 10 ? "0" + nowTime.getMinutes() : nowTime.getMinutes();
+                    let seconds = nowTime.getSeconds() < 10 ? "0" + nowTime.getSeconds() : nowTime.getSeconds();
+                    return year + "-" + month + "-" + date + "\t\t" + hour + ":" + minute + ':' + seconds;
+                },
+
+            },
+            created(){
+                let _this = this;
+                _this.query(1);
+            }
+        })
+    </script>
+</body>
+</html>

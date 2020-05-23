@@ -1,0 +1,46 @@
+body {
+    background-color: aliceblue
+}
+form {
+    width: 620px ;
+    height: 300px ;
+    margin: 150px 0 0 180px;
+    background-color: aliceblue;
+    border-radius: 10px;
+}
+.one {
+    margin-right: 40px;
+}
+span {
+    margin:60px 0 0 80px;
+    font-size: 16px;
+    color: red;
+    font-weight: bold;
+}
+form button {
+    width: 140px !important;
+    margin-right: 20px;
+}
+
+.uploadImg{
+    width: 324px;
+    height: 400px;
+    position: absolute;
+    top:130px;
+    left: 740px;
+    padding: 10px;
+    float: left;
+}
+.uploadImg img {
+    width: 300px;
+    height: 300px;
+    border-radius: 150px;
+    border: 1px solid #000;
+}
+input[type="file"] {
+    visibility: hidden;
+}
+.uploadImg button {
+    width: 140px !important;
+    margin-left: 80px;
+}

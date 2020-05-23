@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>薪资统计</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/resourceList.css">
+</head>
+<body>
+    <body>
+        <div class="container-fluid clearfix" id="app">
+            <h6>统计报表 >> 薪资统计</h6>
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="dept-tab" data-toggle="tab" href="#dept" role="tab" aria-controls="dept" aria-selected="true">部门薪资统计</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="emp-tab" data-toggle="tab" href="#emp" role="tab" aria-controls="emp" aria-selected="false">员工薪资统计</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="dept" role="tabpanel" aria-labelledby="dept-tab">
+                    <form>
+                        <div class="row row-cols-4">
+                            <div class="col-sm-3 mb-3">
+                                <label for="type">查询类型：</label>
+                                <select class="form-control" id="type" v-model="type">
+                                    <option value="year">按年份</option>
+                                    <option value="quarter">按季度</option>
+                                    <option value="month">按月份</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-3 mb-3">
+                                <label for="year">年份：</label>
+                                <select class="form-control" id="year" v-model="year">
+                                    <option v-for="option in yearOption" :value="option">
+                                        {{ option}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-sm-3 mb-3" v-show="type === 'quarter'">
+                                <label for="quarter">季度：</label>
+                                <select class="form-control" id="quarter" v-model="quarter">
+                                    <option value="1" selected>季度一</option>
+                                    <option value="2">季度二</option>
+                                    <option value="3">季度三</option>
+                                    <option value="4">季度四</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-3 mb-3" v-show="type === 'month'">
+                                <label for="month">月份：</label>
+                                <select class="form-control" id="month" v-model="month">
+                                    <option value="1" selected>1月份</option>
+                                    <option value="2">2月份</option>
+                                    <option value="3">3月份</option>
+                                    <option value="4">4月份</option>
+                                    <option value="5">5月份</option>
+                                    <option value="6">6月份</option>
+                                    <option value="7">7月份</option>
+                                    <option value="8">8月份</option>
+                                    <option value="9">9月份</option>
+                                    <option value="10">10月份</option>
+                                    <option value="11">11月份</option>
+                                    <option value="12">12月份</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2 mb-3">
+                                <button type="button" class="btn btn-primary" @click="query1">查询</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="echarts-dept" style="width: 1100px;height:500px;"></div>
+                </div>
+                <div class="tab-pane fade" id="emp" role="tabpanel" aria-labelledby="emp-tab">
+                    <form>
+                        <div class="row row-cols-4">
+                            <div class="col-sm-3 mb-3 ">
+                                <label for="id">用户编号：</label>
+                                <input type="text" class="form-control" id="id"  required v-model="id" onkeyup="this.value=this.value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5.]/g,'')">
+                            </div>
+                            <div class="col-sm-3 mb-3">
+                                <label for="beginTime">起始时间：</label>
+                                <input type="date" class="form-control" id="beginTime" required v-model="beginTime">
+                            </div>
+                            <div class="col-sm-3 mb-3">
+                                <label for="endTime">终止时间：</label>
+                                <input type="date" class="form-control" id="endTime" required v-model="endTime">
+                            </div>
+                            <div class="col-sm-2 mb-3">
+                                <button type="button" class="btn btn-primary" @click="query2">查询</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="echarts-emp" style="width: 1100px;height:500px;"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+        <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/echarts@4.1.0/dist/echarts.js"></script>
+        <!-- <script src="https://cdn.jsdelivr.net/npm/vue-echarts@4.0.2"></script> -->
+        <script>
+            const app = new Vue({
+                el: "#app",
+                data: {
+                    yearOption: '',
+                    year: '',
+                    quarter: '',
+                    month: '',
+                    type: 'year',
+                    id: '',
+                    beginTime: '',
+                    endTime: '',
+                    dataList1: ['2019/4/10', '2019/4/11', '2019/4/12', '2019/4/13', '2019/4/14', '2019/4/15'],
+                    option1:{
+                        name: '部门薪资总和',
+                        type: 'bar',
+                        data: [5, 20, 36, 10, 10, 20]
+                    },
+                    dataList2: ['2019/4/10', '2019/4/11', '2019/4/12', '2019/4/13', '2019/4/14', '2019/4/15'],
+                    option2:{
+                        name: '当月薪资',
+                        type: 'line',
+                        data: [5, 20, 36, 10, 10, 20]
+                    },
+                },
+                methods: {
+                    query1(){
+                        let _this = this;
+                        axios({
+                            method: 'post',
+                            url: '/count/deptSalaryStatistics',
+                            data:{
+                                year: _this.year,
+                                quarter: _this.quarter,
+                                month: _this.month,
+                                type: _this.type
+                            }
+                        })
+                        .then(function (result) {
+                            _this.dataList1 = result.data.dataList;
+                            _this.option1.data = result.data.options;
+                            _this.initChart('.echarts-dept',_this.dataList1,_this.option1);
+                        })
+                        .catch(function (err) {
+                            console.log(err);
+                        })
+                    },
+                    query2(){
+                        let _this = this;
+                        axios({
+                            method: 'post',
+                            url: '/count/empSalaryStatistics',
+                            data:{
+                                id: _this.id,
+                                beginTime: _this.beginTime,
+                                endTime: _this.endTime
+                            }
+                        })
+                            .then(function (result) {
+                                _this.dataList2 = result.data.dataList;
+                                _this.option2.data = result.data.options;
+                                _this.initChart('.echarts-emp',_this.dataList2,_this.option2);
+                            })
+                            .catch(function (err) {
+                                console.log(err);
+                            })
+                    },
+                    initChart(id,dataList,option){
+                        // 基于准备好的dom，初始化echarts实例
+                        let  myChart = echarts.init(document.querySelector(id));
+                        // 绘制图表
+                        myChart.setOption({
+                            //添加标题
+                            title: {
+                                text: ''
+                            },
+                            //添加小贴士
+                            tooltip: {},
+                            xAxis: {
+                                data: dataList
+                            },
+                            yAxis: {},
+                            //在series属性中，添加图形类型以及数据
+                            series: [option]
+                        });
+                    },
+                },
+                created(){
+                    let _this = this;
+                    axios({
+                        method: 'post',
+                        url: '/count/getYears'
+                    })
+                    .then(function (result) {
+                        _this.yearOption = result.data;
+                    })
+                },
+                mounted(){
+                    let time = new Date();
+                    let y = time.getFullYear();
+                    let m = time.getMonth() + 1;
+                    let d = time.getDate();
+                    m = m < 10 ? '0' + m : m;
+                    d = d < 10 ? '0' + d : d;
+                    this.beginTime = y + '-' + m + '-' + d;
+                    this.endTime = y + '-' + m + '-' + d;
+                }
+            })
+        </script>
+    </body>
+</body>
+</html>

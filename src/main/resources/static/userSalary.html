@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人薪资</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/userSalary.css">
+</head>
+<body>
+    <div class="container-fluid clearfix" id="app">
+        <h6>薪资管理 >> 个人薪资</h6>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="current-tab" data-toggle="tab" href="#current" role="tab" aria-controls="current" aria-selected="true">上月薪资</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="history-tab" data-toggle="tab" href="#history" role="tab" aria-controls="history" aria-selected="false">过往薪资</a>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="current" role="tabpanel" aria-labelledby="current-tab">
+                <table class="table table-bordered" v-show="isShow">
+                    <thead>
+                      <tr>
+                        <th scope="col" colspan="12">上月薪资单</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td rowspan="2" class="line-middle">基本薪资</td>
+                        <td rowspan="2" class="line-middle">考核天数</td>
+                        <td colspan="2">加班</td>
+                        <td rowspan="2" class="line-middle">绩效</td>
+                        <td rowspan="2" class="line-middle">全勤</td>
+                        <td colspan="5">缺勤天数</td>
+                        <td rowspan="2" class="line-middle">小计</td>
+                      </tr>
+                      <tr>
+                        <td>加班天数</td>
+                        <td>应发金额</td>
+                        <td>病事假</td>
+                        <td>未出勤</td>
+                        <td>婚丧</td>
+                        <td>迟到</td>
+                        <td>扣款</td>
+                      </tr>
+                      <tr>
+                          <td v-text="salary.baseSalary"></td>
+                          <td v-text="salary.attendenceDay"></td>
+                          <td v-text="salary.overTime"></td>
+                          <td v-text="salary.overTimeSalary"></td>
+                          <td v-text="salary.performance"></td>
+                          <td v-text="salary.fullAttendence"></td>
+                          <td v-text="salary.sickLeave"></td>
+                          <td v-text="salary.unattend"></td>
+                          <td v-text="salary.marray2funeral"></td>
+                          <td v-text="salary.late"></td>
+                          <td v-text="salary.unattendSalary"></td>
+                          <td v-text="salary.commuteSalary"></td>
+                      </tr>
+                      <tr>
+                        <td colspan="12"></td>
+                      </tr>
+                      <tr>
+                          <td colspan="7">其他</td>
+                          <td colspan="2" rowspan="2" class="line-middle">应缴税额</td>
+                          <td colspan="3" rowspan="2" class="line-middle">合计</td>
+                      </tr>
+                      <tr>
+                        <td>违纪/罚款</td>
+                        <td>交通补贴</td>
+                        <td>住房补助</td>
+                        <td>餐补</td>
+                        <td>采购补助</td>
+                        <td>公积金</td>
+                        <td>小计</td>
+                    </tr>
+                    <tr>
+                        <td v-text="salary.disciplineFine"></td>
+                        <td v-text="salary.trafficSalary"></td>
+                        <td v-text="salary.houseSalary"></td>
+                        <td v-text="salary.foodSalary"></td>
+                        <td v-text="salary.purchaseSalary"></td>
+                        <td v-text="salary.providentFund"></td>
+                        <td v-text="salary.otherSalary"></td>
+                        <td colspan="2" v-text="salary.tax"></td>
+                        <td colspan="3" v-text="salary.total"></td>
+                    </tr>
+                    </tbody>
+                  </table>
+                  <p v-show="!isShow">
+                      您当月的工资单还未生成
+                  </p>
+            </div>
+            <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
+                <form>
+                    <div class="row row-cols-4">
+                        <div class="col-sm-3 mb-3">
+                            <label for="time">时间：</label>
+                            <input type="date" class="form-control" id="time" required v-model="time">
+                        </div>
+                        <div class="col-sm-2 mb-3">
+                            <button type="button" class="btn btn-primary" @click="query(1)">查询</button>
+                        </div>
+                    </div>
+                </form>
+                <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th scope="col">编号</th>
+                        <th scope="col">基本薪资</th>
+                        <th scope="col">加班</th>
+                        <th scope="col">绩效</th>
+                        <th scope="col">全勤</th>
+                        <th scope="col">缺勤</th>
+                        <th scope="col">其他</th>
+                        <th scope="col">税额</th>
+                        <th scope="col">合计</th>
+                        <th scope="col">时间</th>
+                        <th scope="col" >操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="item in dataList">
+                          <td v-text="item.id"></td>
+                          <td v-text="item.baseSalary"></td>
+                          <td v-text="item.overTimeSalary"></td>
+                          <td v-text="item.performance"></td>
+                          <td v-text="item.fullAttendence"></td>
+                          <td v-text="item.unattendSalary"></td>
+                          <td v-text="item.otherSalary"></td>
+                          <td v-text="item.tax"></td>
+                          <td v-text="item.total"></td>
+                          <td v-text="showDate(item.updateTime)"></td>
+                          <td>
+                              <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#detail" @click="editSalary(item)">详情</button>
+                          </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="modal fade bd-example-modal-xl" id="detail" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-xl" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">薪资单详情</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            </div>
+                            <div class="modal-body">
+                                <table class="table table-bordered" v-show="isShow">
+                                    <thead>
+                                      <tr>
+                                        <th scope="col" colspan="12">{{historyTime}}薪资单</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr>
+                                        <td rowspan="2" class="line-middle">基本薪资</td>
+                                        <td rowspan="2" class="line-middle">考核天数</td>
+                                        <td colspan="2">加班</td>
+                                        <td rowspan="2" class="line-middle">绩效</td>
+                                        <td rowspan="2" class="line-middle">全勤</td>
+                                        <td colspan="5">缺勤天数</td>
+                                        <td rowspan="2" class="line-middle">小计</td>
+                                      </tr>
+                                      <tr>
+                                        <td>加班天数</td>
+                                        <td>应发金额</td>
+                                        <td>病事假</td>
+                                        <td>未出勤</td>
+                                        <td>婚丧</td>
+                                        <td>迟到</td>
+                                        <td>扣款</td>
+                                      </tr>
+                                      <tr>
+                                          <td v-text="historySalary.baseSalary"></td>
+                                          <td v-text="historySalary.attendenceDay"></td>
+                                          <td v-text="historySalary.overTime"></td>
+                                          <td v-text="historySalary.overTimeSalary"></td>
+                                          <td v-text="historySalary.performance"></td>
+                                          <td v-text="historySalary.fullAttendence"></td>
+                                          <td v-text="historySalary.sickLeave"></td>
+                                          <td v-text="historySalary.unattend"></td>
+                                          <td v-text="historySalary.marray2funeral"></td>
+                                          <td v-text="historySalary.late"></td>
+                                          <td v-text="historySalary.unattendSalary"></td>
+                                          <td v-text="historySalary.commuteSalary"></td>
+                                      </tr>
+                                      <tr>
+                                        <td colspan="12"></td>
+                                      </tr>
+                                      <tr>
+                                          <td colspan="7">其他</td>
+                                          <td colspan="2" rowspan="2" class="line-middle">应缴税额</td>
+                                          <td colspan="3" rowspan="2" class="line-middle">合计</td>
+                                      </tr>
+                                      <tr>
+                                        <td>违纪/罚款</td>
+                                        <td>交通补贴</td>
+                                        <td>住房补助</td>
+                                        <td>餐补</td>
+                                        <td>采购补助</td>
+                                        <td>公积金</td>
+                                        <td>小计</td>
+                                    </tr>
+                                    <tr>
+                                        <td v-text="historySalary.disciplineFine"></td>
+                                        <td v-text="historySalary.trafficSalary"></td>
+                                        <td v-text="historySalary.houseSalary"></td>
+                                        <td v-text="historySalary.foodSalary"></td>
+                                        <td v-text="historySalary.purchaseSalary"></td>
+                                        <td v-text="historySalary.providentFund"></td>
+                                        <td v-text="historySalary.otherSalary"></td>
+                                        <td colspan="2" v-text="historySalary.tax"></td>
+                                        <td colspan="3" v-text="historySalary.total"></td>
+                                    </tr>
+                                    </tbody>
+                                  </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination">
+                            <li class="page-item page-link cursor-pointer" @click="query(1)">首页</li>
+                            <li class="page-item page-link cursor-pointer" @click="query(currentPage-1)">上一页 </li>
+                            <li class="page-item page-link ">{{currentPage}}</li>
+                            <li class="page-item page-link cursor-pointer" @click="query(currentPage+1)">下一页</li>
+                            <li class="page-item page-link cursor-pointer" @click="query(totalPage)">末页</li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+          </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const app = new Vue({
+            el: "#app",
+            data:{
+                isShow: true,
+                salary: {
+                    baseSalary:'',
+                    attendenceDay: '',
+                    overTime: '',
+                    overTimeSalary: '',
+                    performance: '',
+                    fullAttendence: '',
+                    sickLeave: '',
+                    unattend: '',
+                    marray2funeral: '',
+                    late: '',
+                    unattendSalary: '',
+                    commuteSalary: '',
+                    disciplineFine: '',
+                    trafficSalary: '',
+                    houseSalary: '',
+                    foodSalary: '',
+                    purchaseSalary: '',
+                    providentFund: '',
+                    otherSalary: '',
+                    tax: '',
+                    total: '',
+                },
+                historySalary: {
+                    baseSalary:'',
+                    attendenceDay: '',
+                    overTime: '',
+                    overTimeSalary: '',
+                    performance: '',
+                    fullAttendence: '',
+                    sickLeave: '',
+                    unattend: '',
+                    marray2funeral: '',
+                    late: '',
+                    unattendSalary: '',
+                    commuteSalary: '',
+                    disciplineFine: '',
+                    trafficSalary: '',
+                    houseSalary: '',
+                    foodSalary: '',
+                    purchaseSalary: '',
+                    providentFund: '',
+                    otherSalary: '',
+                    tax: '',
+                    total: '',
+                },
+                historyTime: '',
+                time: '',
+                dataList: '',
+                totalPage: '',
+                currentPage: '',
+            },
+            methods:{
+                query(pageNo){
+                    let _this = this;
+                    axios({
+                        method: 'post',
+                        url: '/salary/getHistorySalarys',
+                        data: {
+                            time: _this.time,
+                            pageNo: pageNo,
+                        }
+                    })
+                        .then(function(result){
+                            _this.dataList = result.data.dataList;
+                            _this.totalPage = result.data.totalPage;
+                            _this.currentPage = result.data.currentPage;
+                            _this.time = result.data.time;
+                        })
+                        .catch(function(err){
+                            console.log(err);
+                        })
+                },
+                showDate(time){
+                    let nowTime = new Date(time);
+                    let year = nowTime.getFullYear();
+                    let month = nowTime.getMonth() + 1 < 10 ? "0" + (nowTime.getMonth() + 1) : nowTime.getMonth() + 1;
+                    let date = nowTime.getDate() < 10 ? "0" + nowTime.getDate() : nowTime.getDate();
+                    let hour = nowTime.getHours() < 10 ? "0" + nowTime.getHours() : nowTime.getHours();
+                    let minute = nowTime.getMinutes() < 10 ? "0" + nowTime.getMinutes() : nowTime.getMinutes();
+                    let seconds = nowTime.getSeconds() < 10 ? "0" + nowTime.getSeconds() : nowTime.getSeconds();
+                    this.showTime(year,month);
+                    return year + "-" + month + "-" + date;
+                },
+                showTime(year,month){
+                    this.historyTime = year + "年" + month + "月";
+                },
+                editSalary(item){
+                    this.historySalary = item;
+                }
+            },
+            created(){
+                let _this = this;
+                axios({
+                    method: 'post',
+                    url: '/salary/getNowSalary',
+                    data: {
+                    }
+                })
+                    .then(function(result){
+                        _this.salary = result.data.salary;
+                        _this.isShow = result.data.isShow;
+                    })
+                    .catch(function(err){
+                        console.log(err);
+                    })
+
+                _this.query(1);
+            }
+        })
+    </script>
+</body>
+</html>

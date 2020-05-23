@@ -1,0 +1,80 @@
+body {
+    background-color: aliceblue;
+}
+form {
+    width: 800px;
+    height: 120px;
+    margin:  15px 0 0 50px;
+    padding: 20px 0 0 40px;
+}
+
+form button {
+    width: 140px !important;
+    margin-top: 30px;
+}
+.users{
+    width: 1200px;
+    margin-left: 20px;
+}
+.perUser{
+    width: 240px;
+    height: 300px;
+    border: 1px solid #eeeeee;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    margin-right: 15px;
+    float: left;
+    position: relative;
+    background-color: #fbfbfb;
+}
+img {
+    width: 80px;
+    height: 80px;
+    border: 1px solid #eeeeee;
+    border-radius: 40px;
+    position: absolute;
+    top: 10px;
+    left: 140px;
+}
+.rowInfo{
+    width: 120px;
+    height: 30px;
+    margin:10px 0 0 10px
+}
+.rowWidth-200{
+    width: 200px !important;
+}
+.rowInfo label{
+    float: left;
+}
+.rowInfo + select {
+    margin-top: 10px;
+    margin-left: 20px;
+    width: 100px !important;
+    height: 35px !important;
+}
+.user_State{
+    position: absolute;
+    top: 250px;
+    left: 200px;
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+}
+.bgc_green {
+    background-color: chartreuse;
+}
+.bgc_blue {
+    background-color: deepskyblue;
+}
+.bgc_yellow {
+    background-color: orange;
+}
+.bgc_grey {
+     background-color: gray;
+ }
+
+
+nav ul{
+    margin-left: 340px !important;
+}

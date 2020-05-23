@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修改密码</title>
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link rel="stylesheet" href="/css/theme.css">
+        <link rel="stylesheet" href="/css/updatePwd.css">
+</head>
+<body>
+    <div class="container-fluid clearfix" id="app">
+        <h6>员工管理 >> 修改密码</h6>
+        <form>
+            <div class="form-group form-row">
+                <label for="oldPwd" class="col-sm-3 col-form-label">原密码:</label>
+                <div class="col-sm-8">
+                  <input type="password" class="form-control form-control-sm" id="oldPWd" v-model="oldPwd">
+                </div>
+              </div>
+              <div class="form-group form-row">
+                <label for="newPwd" class="col-sm-3 col-form-label">新密码:</label>
+                <div class="col-sm-8">
+                  <input type="password" class="form-control form-control-sm" id="newPwd"  v-model="newPwd">
+                </div>
+              </div>
+              <div class="form-group form-row">
+                <label for="confirmPwd" class="col-sm-3 col-form-label">确认密码:</label>
+                <div class="col-sm-8">
+                  <input type="password" class="form-control form-control-sm" id="confirmPwd"  v-model="confirmPwd">
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary" @click="submit">提交</button>
+              <span v-text="err_msg"></span>
+        </form>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const app = new Vue({
+            el: "#app",
+            data: {
+                oldPwd: '',
+                newPwd:'',
+                confirmPwd:'',
+                err_msg: '',
+            },
+            methods: {
+                submit(){
+                    if(!this.verify.flag){
+                        this.err_msg = this.verify.msg;
+                    }
+                    else{
+                        this.err_msg = '';
+                        let _this = this;
+                        axios({
+                            method: 'post',
+                            url: '/user/toUpdatePwd',
+                            data: {
+                                oldPwd: _this.oldPwd,
+                                newPwd: _this.newPwd,
+                            }
+                        })
+                            .then(function(result) {
+                                if(result.data === 201){
+                                    _this.err_msg = "修改失败，请选择新的密码";
+                                }
+                                else if(result.data === 202){
+                                    _this.err_msg = "原密码不正确";
+                                }
+                                else if (result.data === 200){
+                                    alert("修改成功");
+                                    parent.location.reload();
+                                }
+                            })
+                            .catch(function(err){
+                                console.log(err);
+                            });
+                    }
+                }
+            },
+            computed: {
+                verify:function(){
+                    if(this.oldPwd === ''){
+                        return {
+                            "flag":false,
+                            "msg": '原密码不能为空'
+                        };
+                    }
+                    if(this.newPwd === ''){
+                        return {
+                            "flag":false,
+                            "msg": '新密码不能为空'
+                        };
+                    }
+                    if(this.newPwd === this.oldPwd){
+                        return {
+                            "flag":false,
+                            "msg": '新旧密码一致'
+                        };
+                    }
+                    if(this.confirmPwd === ''){
+                        return {
+                            "flag":false,
+                            "msg": '确认密码不能为空'
+                        };
+                    }
+                    if(this.confirmPwd !== this.newPwd){
+                        return {
+                            "flag":false,
+                            "msg": '两次输入的新密码不一致'
+                        };
+                    }
+                    return {
+                        "flag":true,
+                        "msg": ''
+                    }
+                }
+            }
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>registUser</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/resourceList.css">
+</head>
+<body>
+    <body>
+        <div class="container-fluid clearfix" id="app">
+            <h6>企业资源管理 >> 资源列表</h6>
+            <form>
+                <div class="row row-cols-4">
+                    <div class="col-sm-3 mb-3 ">
+                      <label for="queryName">资源名称：</label>
+                      <input type="text" class="form-control" id="queryName"  required v-model="queryName" onkeyup="this.value=this.value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5.]/g,'')">
+                    </div>
+                    <div class="col-sm-2 mb-3">
+                        <button type="button" class="btn btn-primary" @click="query(1)">查询</button>
+                    </div>
+                </div>
+            </form>
+            <div>
+                <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th scope="col">编号</th>
+                        <th scope="col">资源名称：</th>
+                        <th scope="col">数量：</th>
+                        <th scope="col">操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+<!--                      <tr>-->
+<!--                        <th scope="row">0</th>-->
+<!--                        <td>奥迪商务车</td>-->
+<!--                        <td>3</td>-->
+<!--                        <td>-->
+<!--                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">申请资源</button>-->
+<!--                        </td>-->
+<!--                      </tr>-->
+                      </tr>
+                    <tr v-for="resource in dataList">
+                        <th scope="row" v-text="resource.id"></th>
+                        <td v-text="resource.name"></td>
+                        <td v-text="resource.amount + '/' + resource.unit"></td>
+                        <td>
+                            <button type="button" class="btn btn-primary" @click="applyResource(resource.id,resource.name,resource.amount)" data-toggle="modal" data-target="#exampleModalCenter">申请资源</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                  </table>
+            </div>
+            <div>
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        <li class="page-item page-link cursor-pointer" @click="query(1)">首页</li>
+                        <li class="page-item page-link cursor-pointer" @click="query(currentPage-1)">上一页 </li>
+                        <li class="page-item page-link ">{{currentPage}}</li>
+                        <li class="page-item page-link cursor-pointer" @click="query(currentPage+1)">下一页</li>
+                        <li class="page-item page-link cursor-pointer" @click="query(totalPage)">末页</li>
+                    </ul>
+                </nav>
+            </div>
+            <!-- Button trigger modal
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+                Launch demo modal
+            </button> -->
+            
+            <!-- Modal -->
+            <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" ref="modal">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">资源申请</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    </div>
+                    <div class="modal-body">
+                            <div class="form-group form-row">
+                                <label  class="col-sm-3 col-form-label">资源名称:</label>
+                                <div class="col-sm-8">
+                                    <label class="col-sm-5 col-form-label" v-text="resourceName"></label>
+                                </div>
+                              </div>
+                              <div class="form-group form-row">
+                                <label for="applyAmount" class="col-sm-2 col-form-label">数量:</label>
+                                <div class="col-sm-5">
+                                  <input type="number" class="form-control form-control-sm" id="applyAmount"  v-model="applyAmount">
+                                  <span v-text="err_msg"></span>
+                                </div>
+                              </div>
+                              <div class="form-group form-row">
+                                <label for="note">备注：</label>
+                                <textarea class="form-control" id="note" rows="3" v-model="note"></textarea>
+                              </div>
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" @click="submit()" data-dismiss="modal">提交申请</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+        <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script>
+            const app = new Vue({
+                el: "#app",
+                data: {
+                    queryName: '',
+                    id: '',
+                    resourceName: '奥迪QQ',
+                    note: '',
+                    amount: '',
+                    applyAmount: '',
+                    err_msg: '',
+                    dataList: '',
+                    totalPage:'',
+                    currentPage:'',
+                },
+                methods: {
+                    submit(){
+                      let _this = this;
+                      if(!this.verify.flag){
+                          this.err_msg = this.verify.msg;
+                      }
+                      else{
+                          axios({
+                              method: 'post',
+                              url: '/resource/applyResource',
+                              data: {
+                                  id: _this.id,
+                                  amount: _this.applyAmount,
+                                  note: _this.note,
+                              }
+                          })
+                              .then(function(result) {
+                                  if(result.data === 200){
+                                      alert("申请成功，正在审批中");
+                                      _this.id = '';
+                                      _this.applyAmount = '';
+                                      _this.note = '';
+                                  }
+                                  else if(result.data === 201){
+                                      alert("申请失败，请重新申请");
+                                      _this.id = '';
+                                      _this.applyAmount = '';
+                                      _this.note = '';
+                                  }
+                              })
+                              .catch(function(err){
+                                  console.log(err);
+                              });
+                      }
+                    },
+                    applyResource(id,name,amount){
+                        let _this = this;
+                        _this.id = id;
+                        _this.amount = amount;
+                        _this.resourceName = name;
+                    },
+                    query(pageNo){
+                        let _this = this;
+                        axios({
+                            method: 'post',
+                            url: '/resource/getResourceList',
+                            data: {
+                                queryName: _this.queryName,
+                                pageNo: pageNo,
+                            }
+                        })
+                            .then(function(result) {
+                                _this.dataList = result.data.dataList;
+                                _this.totalPage = result.data.totalPage;
+                                _this.currentPage = result.data.currentPage;
+                                _this.queryName = result.data.queryName;
+                            })
+                            .catch(function(err){
+                                console.log(err);
+                            });
+                    }
+                },
+                created(){
+                    let _this = this;
+                    axios({
+                        method: 'post',
+                        url: '/resource/getResourceList',
+                        data: {
+                            queryName: '',
+                            pageNo: 1,
+                        }
+                    })
+                        .then(function(result) {
+                            _this.dataList = result.data.dataList;
+                            _this.totalPage = result.data.totalPage;
+                            _this.currentPage = result.data.currentPage;
+                        })
+                        .catch(function(err){
+                            console.log(err);
+                        });
+                },
+                computed: {
+                    verify:function(){
+                        if(this.amount < this.applyAmount){
+                            return {
+                                "flag":false,
+                                "msg": '申请数量超过库存',
+                            };
+                        }
+                        return {
+                            "flag":true,
+                            "msg": ''
+                        }
+                    }
+                }
+            })
+        </script>
+    </body>
+</body>
+</html>

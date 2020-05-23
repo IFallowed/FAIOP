@@ -1,0 +1,44 @@
+server:
+  port: 8088
+spring:
+  application:
+    name: faiop
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://49.234.120.252:3306/FAIOP
+    username: root
+    password: kc1289
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 3MB
+      max-request-size: 5MB
+
+file:
+  uploadFolder: /upload/
+  uploadAvatar: /upload/avatar/
+  uploadContract: /upload/contract/
+  uploadDoc: /upload/doc/
+
+mybatis:
+  type-aliases-package: com.faiop.core.pojo
+logging:
+  level:
+    com.faiop.core: debug
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true  #启用分页参数合理化，如果 pageNum <= 0 会查询第一页，如果 pageNum > pages 会查询最后一页。禁用后，当pageNum>pageSize会返回空数据
+  support-methods-arguments: true #配置自动分页，如果方法参数中有pageNum，pageSize分页参数，则会自动分页
+  params: count=countSql
+
+salary:
+  baseSalary: 5000
+  trafficSalary: 500
+  houseSalary: 1500
+  foodSalary: 300
+  providentFund: 2000
+  overTime: 150
+  sickLeave: -50
+  unattend: -200
+  marray2funeral: -50
+  late: -100

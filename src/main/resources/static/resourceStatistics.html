@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业资源统计</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/resourceList.css">
+</head>
+<body>
+    <body>
+        <div class="container-fluid clearfix" id="app">
+            <h6>统计报表 >> 企业资源统计</h6>
+            <form style="width: 1200px">
+                <div class="row row-cols-4">
+                    <div class="col-sm-2 mb-3 ">
+                        <label for="resourceName">资源名称：</label>
+                        <input type="text" class="form-control" id="resourceName"  required v-model="resourceName" onkeyup="this.value=this.value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5.]/g,'')">
+                    </div>
+                    <div class="col-sm-2 mb-3 ">
+                        <label for="type">类型：</label>
+                        <select class="form-control" id="type" v-model="type" style="width: 100px">
+                            <option value="">请选择</option>
+                            <option value="1">借出</option>
+                            <option value="2">归还</option>
+                            <option value="3">采购</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-2 mb-3">
+                        <label for="beginTime">起始时间：</label>
+                        <input type="date" class="form-control" id="beginTime" required v-model="beginTime">
+                    </div>
+                    <div class="col-sm-2 mb-3">
+                        <label for="endTime">终止时间：</label>
+                        <input type="date" class="form-control" id="endTime" required v-model="endTime">
+                    </div>
+                    <div class="col-sm-2 mb-3">
+                        <button type="button" class="btn btn-primary" @click="query(1)">查询</button>
+                    </div>
+                </div>
+            </form>
+            <div>
+                <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th scope="col">编号</th>
+                        <th scope="col">资源名称</th>
+                        <th scope="col">数量</th>
+                        <th scope="col">类型</th>
+                        <th scope="col">申请人</th>
+                        <th scope="col">审批人</th>
+                        <th scope="col">更新时间</th>
+                        <th scope="col">操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="item in dataList">
+                          <th scope="row" v-text="item.id"></th>
+                          <td v-text="item.resource.name"></td>
+                          <td v-text="item.amount + '/' + item.resource.unit"></td>
+                          <td v-text="showType(item.type)"></td>
+                          <td v-text="item.originate.name + '(' + item.originate.role.name + ')'"></td>
+                          <td v-if="item.approval !== null && item.approval.name !== ''" v-text="item.approval.name"></td>
+                          <td v-else></td>
+                          <td v-text="showDate(item.createTime)"></td>
+                          <td>
+                              <button type="button" class="btn btn-primary" @click="showNote(item.note)" data-toggle="modal" data-target="#note">备注</button>
+                          </td>
+                      </tr>
+                    </tbody>
+                  </table>
+            </div>
+
+            <div class="modal fade" id="note" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        <h5 class="modal-title" id="noteTitle">备注</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        </div>
+                        <div class="modal-body">
+                            <p v-text="note"></p>
+                        </div>
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    <li class="page-item page-link cursor-pointer" @click="query(1)">首页</li>
+                    <li class="page-item page-link cursor-pointer" @click="query(currentPage-1)">上一页 </li>
+                    <li class="page-item page-link ">{{currentPage}}</li>
+                    <li class="page-item page-link cursor-pointer" @click="query(currentPage+1)">下一页</li>
+                    <li class="page-item page-link cursor-pointer" @click="query(totalPage)">末页</li>
+                </ul>
+            </nav>
+        </div>
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+        <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script>
+            const app = new Vue({
+                el: "#app",
+                data: {
+                    note:'',
+                    resourceName:'',
+                    type:'',
+                    beginTime:'',
+                    endTime:'',
+                    dataList:'',
+                    totalPage:'',
+                    currentPage:'',
+                },
+                methods: {
+                    showType(type) {
+                        if (type === "1") {
+                            return "借出";
+                        } else if (type === "2") {
+                            return "归还";
+                        } else if (type === "3") {
+                            return "采购";
+                        }
+                    },
+                    showDate(time) {
+                        let nowTime = new Date(time);
+                        let year = nowTime.getFullYear();
+                        let month = nowTime.getMonth() + 1 < 10 ? "0" + (nowTime.getMonth() + 1) : nowTime.getMonth() + 1;
+                        let date = nowTime.getDate() < 10 ? "0" + nowTime.getDate() : nowTime.getDate();
+                        let hour = nowTime.getHours() < 10 ? "0" + nowTime.getHours() : nowTime.getHours();
+                        let minute = nowTime.getMinutes() < 10 ? "0" + nowTime.getMinutes() : nowTime.getMinutes();
+                        let seconds = nowTime.getSeconds() < 10 ? "0" + nowTime.getSeconds() : nowTime.getSeconds();
+                        return year + "-" + month + "-" + date + "\t\t" + hour + ":" + minute + ':' + seconds;
+                    },
+                    showNote(note) {
+                        this.note = note;
+                    },
+                    query(pageNo){
+                        let _this = this;
+                        axios({
+                            method: 'post',
+                            url: '/count/getResourceHistory',
+                            data: {
+                                resourceName: _this.resourceName,
+                                type: _this.type,
+                                beginTime: _this.beginTime,
+                                endTime: _this.endTime,
+                                pageNo: pageNo,
+                            }
+                        })
+                            .then(function(result) {
+                                _this.dataList = result.data.dataList;
+                                _this.totalPage = result.data.totalPage;
+                                _this.currentPage = result.data.currentPage;
+                                _this.resourceName = result.data.resourceName;
+                                _this.type = result.data.type;
+                                _this.beginTime = result.data.beginTime;
+                                _this.endTime = result.data.endTime;
+                            })
+                            .catch(function(err){
+                                console.log(err);
+                            });
+                    }
+                },
+                created(){
+                    let _this = this;
+                    _this.query(1);
+                },
+            })
+        </script>
+    </body>
+</body>
+</html>

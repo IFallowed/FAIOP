@@ -1,0 +1,23 @@
+body {
+    background-color: #eeeeee;
+}
+form {
+    width: 450px;
+    height: 250px;
+    margin: 130px 0 0 300px;
+    padding: 20px 0 0 40px;
+}
+form label {
+    width: 50px;
+    height: 30px;
+    margin-right: 30px;
+}
+span {
+    margin:60px 0 0 80px;
+    font-size: 16px;
+    color: red;
+    font-weight: bold;
+}
+button {
+    width: 140px !important;
+}

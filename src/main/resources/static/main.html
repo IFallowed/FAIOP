@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>main</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/theme.css">
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+    <div class="container-fluid clearfix" id="app">
+        <!-- Content here -->
+        <header class="clearfix">
+            <!--top-->
+            <div class="float-left clearfix">
+                <svg class="bi bi-justify" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M2 12.5a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5zm0-3a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5z" clip-rule="evenodd"/>
+                  </svg>
+                <label>财务资产集成办公平台</label>
+            </div>
+            <div class="float-right">
+                <!--date-->
+                <label v-text="showDate"></label>
+                &nbsp;&nbsp;&nbsp;<a href="/user/quit">退出</a>
+            </div> 
+        </header>
+        <div class="h bgc-c9"></div>
+        <div class="clearfix" style="height: 100%;">
+            <!--main-->
+            <div class="nav bgc-f3 float-left">
+                <!--nav-->
+                <div class="user-info clearfix">
+                    <!--userInfo-->
+                    <img :src="avatar" class="float-left cursor-pointer"/>
+                    <div class="float-left">
+                        <label class="cursor-pointer" v-text="name"></label>
+                        <br/>
+                        <label class="cursor-pointer" v-text="dept"></label>
+                    </div>
+                </div>
+                <div class="h bgc-f"></div>
+                <div class="navList">
+                    <!--navList-->
+                    <ul>
+                        <li v-for="(value,key) in menulist" :key="key">
+                            <div class="parentMenu cursor-pointer" @click="showToggle(value)">
+                                <!--parentMenu-->
+                                <span v-text="value.name"></span>
+                            </div>
+                            <ul v-show="value.isSubShow">
+                                <li v-for="(subValue,subKey) in value.subMap" :key="subKey">
+                                    <div class="childMenu bgc-f cursor-pointer" @click="pageJump(subValue.url)">
+                                        <!--childMenu-->
+                                        <span v-text="subValue.name"></span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="v bgc-c9 float-left embed-responsive embed-responsive-16by9"></div>
+            <div class="content float-left">
+                <!--iframe-->
+                <iframe id="iframe" :src="pageUrl" class="embed-responsive-item" frameborder="0" width="100%" height="100%"></iframe>
+            </div>
+        </div>
+     </div>
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        const app = new Vue({
+            el: "#app",
+            data:{
+                showDate: '',   //头部日期
+                avatar: '',     //用户头像
+                name: '',
+                password: '',
+                dept: '',
+                pageUrl: 'userInfo.html',
+                menulist: '',
+            },
+            methods:{
+                showNowTime(){
+                    let nowTime = new Date();
+                    let weeks = ["日","一","二","三","四","五","六"];
+                    let year = nowTime.getFullYear();
+                    let month = nowTime.getMonth() + 1 < 10 ? "0" + (nowTime.getMonth() + 1) : nowTime.getMonth() + 1;
+                    let date = nowTime.getDate() < 10 ? "0" + nowTime.getDate() : nowTime.getDate();
+                    let hour = nowTime.getHours() < 10 ? "0" + nowTime.getHours() : nowTime.getHours();
+                    let minute = nowTime.getMinutes() < 10 ? "0" + nowTime.getMinutes() : nowTime.getMinutes();
+                    let seconds = nowTime.getSeconds() < 10 ? "0" + nowTime.getSeconds() : nowTime.getSeconds();
+                    let week = "星期" + weeks[nowTime.getDay()];
+                    this.showDate = year + "年" + month + "月" + date + "日" + "\t\t" + week + "\t\t" + hour + ":" + minute + ':' + seconds;
+                },
+                showToggle(item){
+                    if(this.password === "123456"){
+                        item.isSubShow = false;
+                    }
+                    else {
+                        // 点击展开折叠菜单事件
+                        item.isSubShow = !item.isSubShow;
+                    }
+                },
+                pageJump(url){
+                    this.pageUrl = url;
+                }
+            },
+            mounted(){
+                setInterval(
+                    () => {
+                        this.showNowTime();
+                    },1000
+                )
+            },
+            created(){
+                let _this = this;
+                axios({
+                    method: 'post',
+                    url: '/main/getUserInfo'
+                })
+                .then(function(result){
+                    _this.menulist = result.data.menuList;
+                    _this.name = result.data.user.account;
+                    _this.password = result.data.user.password;
+                    _this.dept = result.data.user.role.name;
+                    _this.avatar = result.data.user.avatar;
+                    if(_this.password === "123456"){
+                        _this.pageUrl = "updatePwd.html"
+                    }
+                })
+                .catch(function (err) {
+
+                })
+            }
+        })
+    </script>
+</body>
+</html>

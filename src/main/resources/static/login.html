@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>login</title>
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link rel="stylesheet" href="/css/login.css">
+        <link rel="stylesheet" href="/css/theme.css">
+</head>
+<body>
+    <div id="login" class="bgc-c7defc">
+        <h4>财务资产集成办公系统</h4>
+        <form>
+            <div class="form-group form-row">
+                <label for="inputAccount" class="col-sm-3 col-form-label">用户名:</label>
+                <div class="col-sm-8">
+                  <input type="text" class="form-control form-control-sm" id="inputAccount" v-model="account" onkeyup="this.value=this.value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5.]/g,'')">
+                </div>
+              </div>
+              <div class="form-group form-row">
+                <label for="inputPassword" class="col-sm-3 col-form-label">密码:</label>
+                <div class="col-sm-8">
+                  <input type="password" class="form-control form-control-sm" id="inputPassword"  v-model="password">
+                </div>
+              </div>
+              <div class="form-group form-row">
+                <label for="inputValidate" class="col-sm-3 col-form-label">验证码:</label>
+                <div class="col-sm-4 clearfix">
+                  <input type="text" class="form-control form-control-sm float-left" id="inputValidate" v-model="validate">
+                </div>
+                <canvas ref='canvas' width="80px" height="30px"></canvas>
+                <a @click="changeImg">换一张</a>
+              </div>
+              <button type="button" class="btn btn-primary" @click="submit">Sign in</button>
+              <span v-text="err_msg"></span>
+        </form>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const login = new Vue({
+            el: "#login",
+            data: {
+                account: '',
+                password: '',
+                validate: '',
+                context:'',
+                err_msg: '',
+            },
+            methods: {
+                submit(){
+                    console.log(this.context);
+                    if(!this.verify.flag){
+                        this.err_msg = this.verify.msg;
+                    }
+                    else{
+                        this.err_msg = '';
+                        let _this = this;
+                        axios({
+                            method: 'post',
+                            url: '/user/toLogin',
+                            data: {
+                                account: this.account,
+                                password: this.password,
+                            }
+                        })
+                            .then(function(result) {
+                                if(result.data === 201){
+                                    _this.err_msg = "用户名或密码错误";
+                                }
+                                else if (result.data === 200){
+                                    if(_this.password === "123456"){
+                                        alert("密码不得与初始密码一致，请尽快修改密码");
+                                    }
+                                    window.location.href='main.html';
+                                }
+                            })
+                            .catch(function(err){
+                                console.log(err);
+                            });
+                    }
+                },
+                changeImg(){
+                    this.context = '',
+                    this.drawPic(this);
+                },
+                /**生成一个随机数**/
+                randomNum(min,max){
+                    return Math.floor( Math.random()*(max-min)+min);
+                },
+                /**生成一个随机色**/
+                randomColor(min,max){
+                    let r = this.randomNum(min,max);
+                    let g = this.randomNum(min,max);
+                    let b = this.randomNum(min,max);
+                    return "rgb("+r+","+g+","+b+")";
+                },
+                /**绘制验证码图片**/
+                drawPic(_this){
+                    let canvas=_this.$refs.canvas;
+                    let width=canvas.width;
+                    let height=canvas.height;
+                    let ctx = canvas.getContext('2d');
+                    ctx.textBaseline = 'bottom';
+                
+                    /**绘制背景色**/
+                    ctx.fillStyle = _this.randomColor(180,240); //颜色若太深可能导致看不清
+                    ctx.fillRect(0,0,width,height);
+                    /**绘制文字**/
+                    let str = 'ABCEFGHJKLMNPQRSTWXY123456789';
+                    for(let i=0; i<4; i++){
+                        let txt = str[_this.randomNum(0,str.length)];
+                        this.context+=txt;
+                        ctx.fillStyle = _this.randomColor(50,160);  //随机生成字体颜色
+                        ctx.font = _this.randomNum(19,22)+'px SimHei'; //随机生成字体大小
+                        let x = 10+i*15;
+                        let y = _this.randomNum(20,25);
+                        let deg = _this.randomNum(-45, 45);
+                        //修改坐标原点和旋转角度
+                        ctx.translate(x,y);
+                        ctx.rotate(deg*Math.PI/180);
+                        ctx.fillText(txt, 0,0);
+                        //恢复坐标原点和旋转角度
+                        ctx.rotate(-deg*Math.PI/180);
+                        ctx.translate(-x,-y);
+                    }
+                    /**绘制干扰线**/
+                    for(let i=0; i<4; i++){
+                        ctx.strokeStyle = _this.randomColor(40,180);
+                        ctx.beginPath();
+                        ctx.moveTo( _this.randomNum(0,width), _this.randomNum(0,height) );
+                        ctx.lineTo( _this.randomNum(0,width), _this.randomNum(0,height) );
+                        ctx.stroke();
+                    }
+                    // /**绘制干扰点**/
+                    // for(let i=0; i<50; i++){
+                    //     ctx.fillStyle = _this.randomColor(0,255);
+                    //     ctx.beginPath();
+                    //     ctx.arc(_this.randomNum(0,width),_this.randomNum(0,height), 1, 0, 2*Math.PI);
+                    //     ctx.fill();
+                    // }
+                }
+            },
+            mounted(){
+                let _this = this;
+                _this.drawPic(_this);
+            },
+            computed: {
+                verify:function(){
+                    if(this.account == ''){
+                        return {
+                            "flag":false,
+                            "msg": '用户名不能为空'
+                        };
+                    }
+                    if(this.password == ''){
+                        return {
+                            "flag":false,
+                            "msg": '密码不能为空'
+                        };
+                    }
+                    if(this.validate == '' ||  this.validate !== this.context){
+                        return {
+                            "flag":false,
+                            "msg": '验证码错误'
+                        };
+                    }
+                    return {
+                        "flag":true,
+                        "msg": ''
+                    }
+                }
+            }
+        })
+    </script>
+</body>
+</html>

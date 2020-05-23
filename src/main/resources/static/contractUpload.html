@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>合同上传</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/contractUpload.css">
+</head>
+<body>
+    <body>
+        <div class="container-fluid clearfix" id="app">
+            <h6>销售管理 >> 合同上传</h6>
+            <form>
+                <div class="spit">
+                    <div class="form-group form-row">
+                        <label class="col-sm-2 col-form-label">用户名:</label>
+                        <div class="col-sm-6">
+                            <label class="col-form-label" v-text="sellerName"></label>
+                        </div>
+                    </div>
+                    <div class="form-group form-row">
+                    <label for="consumer" class="col-sm-2 col-form-label">客户:</label>
+                        <div class="col-sm-6">
+                          <input type="text" class="form-control form-control-sm" id="consumer" v-model="consumer" required onkeyup="this.value=this.value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5.]/g,'')">
+                        </div>
+                    </div>
+                </div>
+                  <!-- <div class="uploadImg">
+                    <img :src="avatar"></img>
+                    <input type="file" ref="input"
+                       accept="image/gif, image/jpeg, image/jpg, image/png, image/svg"
+                       multiple="multiple"
+                       @change="handleFileChange" />
+                <button type="button" class="btn btn-primary" @click="uploadImg">上传头像</button>
+                </div> -->
+                <div class="form-group form-row">
+                    <label class="col-sm-3 col-form-label">上传图片:</label>
+                    <button type="button" class="btn btn-primary" @click="uploadImg()">浏览</button>
+                    <input type="file" ref="imgInput" id="imgInput"
+                       accept="image/gif, image/jpeg, image/jpg, image/png, image/svg"
+                       multiple="multiple"
+                       @change="imgChange" required/>
+                </div>
+                <img v-show="showImg" :src="imgUrl"><a class="close" @click="delFile" v-show="showImg">x</a></img>
+                <div class="form-group form-row">
+                    <label for="docName" class="col-sm-3 col-form-label">上传文档:</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control form-control-sm" id="docName" v-model="docName">
+                    </div>
+                    <button type="button" class="btn btn-primary" @click="uploadDoc()">浏览</button>
+                    <input type="file" ref="docInput"
+                       accept=".doc,.docx"
+                       multiple="multiple"
+                       @change="docChange" required/>
+                </div>
+                  <button type="button" class="btn btn-primary" @click="submit">提交</button>
+                  <span v-text="err_msg"></span>
+            </form>
+        </div>
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+        <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script>
+            const app = new Vue({
+                el: "#app",
+                data: {
+                    sellerName: 'abc',
+                    consumer: '',
+                    showImg: false,
+                    docName: '',
+                    imgUrl: '',
+                    err_msg: '',
+                },
+                methods: {
+                    imgChange(event){
+                        let img = this.$refs.imgInput.files[0];
+                        let reader = new FileReader();
+                        let _this = this;
+                        reader.onload = function(e){
+                            _this.imgUrl = this.result;
+                        }
+                        reader.readAsDataURL(img);
+                        this.showImg = true;
+                    },
+                    docChange(event){
+                        let doc = this.$refs.docInput.files[0];
+                        this.docName = doc.name;
+                    },
+                    uploadImg(){
+                        this.$refs.imgInput.click();
+                    },
+                    uploadDoc(){
+                        this.$refs.docInput.click();
+                    },
+                    delFile(){
+                        this.imgUrl = '';
+                        this.showImg = false;
+                        this.$refs.imgInput.files[0] = null;
+                    },
+                    submit(){
+                        if(!this.verify.flag){
+                            this.err_msg = this.verify.msg;
+                        }
+                        else{
+                            this.err_msg = '';
+                            let _this = this;
+                            let form = new FormData();
+                            form.append("img",_this.$refs.imgInput.files[0]);
+                            form.append("doc",_this.$refs.docInput.files[0]);
+                            form.append("consumer",_this.consumer);
+                            axios({
+                                method: 'post',
+                                url: '/sale/uploadContract',
+                                data: form,
+                                headers: {
+                                    'Content-Type': 'multipart/form-data'
+                                }
+                            })
+                                .then(function(result) {
+                                    if(result.data === 201){
+                                        alert("上传失败，请重新上传");
+                                    }
+                                    else if(result.data === 202){
+                                        alert("上传失败，图片格式不正确");
+                                    }
+                                    else if(result.data === 203){
+                                        alert("上传失败，文档格式不正确");
+                                    }
+                                    else if (result.data === 200){
+                                        alert("上传成功");
+                                        let _iframe = window.parent.document.getElementById("iframe");
+                                        _iframe.contentWindow.location.reload();
+                                    }
+                                })
+                                .catch(function(err){
+                                    console.log(err);
+                                });
+                        }
+                    }
+                },
+                created(){
+                    let _this = this;
+                    axios({
+                        method: 'post',
+                        url:'/sale/getSellerName',
+                    })
+                    .then(function (result) {
+                        _this.sellerName = result.data;
+                    })
+                    .catch(function (err) {
+                        console.log(err);
+                    })
+                },
+                computed: {
+                    verify:function(){
+                        if(this.consumer === ''){
+                            return {
+                                "flag":false,
+                                "msg": '客户不能为空'
+                            };
+                        }
+                        if(!this.$refs.imgInput.files[0]){
+                            return {
+                                "flag":false,
+                                "msg": '请选择上传照片'
+                            };
+                        }
+                        if(!this.$refs.docInput.files[0]){
+                            return {
+                                "flag":false,
+                                "msg": '请选择上传文档'
+                            };
+                        }
+                        return {
+                            "flag":true,
+                            "msg": ''
+                        }
+                    }
+                },
+            })
+        </script>
+    </body>
+</body>
+</html>

@@ -1,0 +1,75 @@
+html,body{
+    overflow: auto;
+}
+header {
+    width: auto;
+    height: 80px;
+    border: 1px solid #c9c9c9;
+    background-color: #f3f3f3;
+}
+a{
+    color: #aaaaaa;
+}
+a:hover{
+    color: #666666;
+}
+header div {
+    width: 360px;
+    height: 80px;
+    font-size: larger;
+    line-height: 80px;
+    margin-left: 40px;
+    margin-right: 40px;
+    color: #5d5d5d;
+}
+.nav{
+    width: 240px;
+    height: 850px;
+    border: 1px solid #c9c9c9;
+}
+.user-info{
+    width: 100%;
+    height: 120px;
+    border-bottom: 1px solid #c9c9c9;
+    padding: 30px 20px 30px 20px;
+}
+.user-info > img {
+    width: 60px;
+    height: 60px;
+    border: 1px solid #cccccc;
+    border-radius: 30px;
+}
+.user-info > div {
+    width: 118px;
+    height: 60px;
+    margin-left: 20px;
+    padding-top: 6px;
+    font-size: small;
+    font-weight: bolder;
+    color: #5d5d5d;
+}
+.navList{
+    width: inherit;
+    height: calc(100% - 126px);
+    border-top: 1px solid #c9c9c9;
+}
+.parentMenu{
+    width: inherit;
+    height: 60px;
+    border-bottom: 1px solid #cccccc;
+    padding: 15px 0 0 50px;
+    font-size: large;
+    letter-spacing: 4px;
+}
+.childMenu{
+    width: inherit;
+    height: 50px;
+    border-bottom: 1px solid #cccccc;
+    padding: 10px 0 0 70px;
+    font-size: 16px;
+    letter-spacing: 2px;
+}
+.content{
+    width: calc(100% - 244px);
+    height: 850px;
+}
